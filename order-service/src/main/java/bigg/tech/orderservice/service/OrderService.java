@@ -7,6 +7,7 @@ import bigg.tech.orderservice.dto.UserDTO;
 import bigg.tech.orderservice.feign.ProductServiceClient;
 import bigg.tech.orderservice.feign.UserServiceClient;
 import bigg.tech.orderservice.model.Order;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class OrderService {
 
     @Autowired
     private ProductServiceClient productServiceClient;
-
+    @CircuitBreaker(name = "orderService", fallbackMethod = "createOrderFallback")//servis ulaşılmadığı zaman otmatik userı atamasını id ile sağlar.
     public OrderResponseDTO createOrder(Long userId, Long productId, Integer quantity) {
         // 1. Kullanıcıyı UserService'den al
         UserDTO user = userServiceClient.getUserById(userId);
@@ -69,6 +70,22 @@ public class OrderService {
 
         return convertToResponseDTO(order, user, product);
     }
+    // Fallback method
+    public OrderResponseDTO createOrderFallback(Long userId, Long productId, Integer quantity, Exception e) {
+        UserDTO fallbackUser = new UserDTO(userId, "Fallback User", "fallback@email.com");
+        ProductDTO fallbackProduct = new ProductDTO(productId, "Fallback Product", BigDecimal.ZERO, 0);
+
+        OrderResponseDTO fallbackResponse = new OrderResponseDTO();
+        fallbackResponse.setUser(fallbackUser);
+        fallbackResponse.setProduct(fallbackProduct);
+        fallbackResponse.setQuantity(quantity);
+        fallbackResponse.setTotalPrice(BigDecimal.ZERO);
+        fallbackResponse.setOrderDate(LocalDateTime.now());
+        fallbackResponse.setStatus("FALLBACK - SERVICE UNAVAILABLE");
+
+        return fallbackResponse;
+    }
+
 
     public List<OrderResponseDTO> getAllOrders() {
         return orderRepository.findAll().stream()

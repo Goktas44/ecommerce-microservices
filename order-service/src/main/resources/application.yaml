@@ -26,3 +26,43 @@ feign:
       default:
         connectTimeout: 5000
         readTimeout: 5000
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        failure-rate-threshold: 50  # %50 hata oranında devreye gir
+        wait-duration-in-open-state: 10000  # 10 saniye açık kal
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+      productService:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10000
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+
+  retry:
+    instances:
+      userServiceRetry:
+        max-attempts: 3
+        wait-duration: 1000
+      productServiceRetry:
+        max-attempts: 3
+        wait-duration: 1000
+logging:
+  level:
+    com.ecommerce: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    io.github.resilience4j: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
