@@ -26,6 +26,6 @@ public class Order {
     private BigDecimal totalPrice;
     private LocalDateTime orderDate;
     private String status;      // PENDING, COMPLETED, CANCELLED
-
+    private String shippingStatus;
     // constructors, getters, setters
 }

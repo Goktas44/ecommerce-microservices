@@ -5,6 +5,7 @@ import bigg.tech.orderservice.dto.OrderResponseDTO;
 import bigg.tech.orderservice.dto.ProductDTO;
 import bigg.tech.orderservice.dto.UserDTO;
 import bigg.tech.orderservice.feign.ProductServiceClient;
+import bigg.tech.orderservice.feign.ShippingServiceClient;
 import bigg.tech.orderservice.feign.UserServiceClient;
 import bigg.tech.orderservice.model.Order;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -27,6 +28,9 @@ public class OrderService {
 
     @Autowired
     private ProductServiceClient productServiceClient;
+
+    @Autowired
+    private ShippingServiceClient shippingServiceClient;
     @CircuitBreaker(name = "orderService", fallbackMethod = "createOrderFallback")//servis ulaşılmadığı zaman otmatik userı atamasını id ile sağlar.
     public OrderResponseDTO createOrder(Long userId, Long productId, Integer quantity) {
         // 1. Kullanıcıyı UserService'den al
@@ -107,5 +111,19 @@ public class OrderService {
         dto.setOrderDate(order.getOrderDate());
         dto.setStatus(order.getStatus());
         return dto;
+    }
+
+    public String createShippingForOrder(Long orderId, String address, String carrier) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        // Kargo oluştur
+        String trackingNumber = shippingServiceClient.createShipping(orderId, address, carrier);
+
+        // Order'ı güncelle
+        order.setShippingStatus("SHIPPING_CREATED");
+        orderRepository.save(order);
+
+        return trackingNumber;
     }
 }
