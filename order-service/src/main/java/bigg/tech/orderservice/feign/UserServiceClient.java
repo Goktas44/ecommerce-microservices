@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient("user-service")//iletişime geçeeği servis
 public interface UserServiceClient {
     @GetMapping("/api/users/{userId}")
-    @CircuitBreaker(name = "userService", fallbackMethod = "getUserFallback")
+    @CircuitBreaker(name = "userService", fallbackMethod = "getUserFallback")//serviceye ulaşılamazsa getUserfallackmethodunu çağırır
     @Retry(name = "userServiceRetry")
     UserDTO getUserById(@PathVariable("userId") Long userId);
 

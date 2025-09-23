@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 @FeignClient(name = "order-service")
 public interface OrderServiceClient {
     @GetMapping("/api/orders/{orderId}")
-    @CircuitBreaker(name = "orderService", fallbackMethod = "getOrderFallback")
-    OrderDTO getOrderById(@PathVariable("orderId") Long orderId);
+    @CircuitBreaker(name = "orderService", fallbackMethod = "getOrderFallback")//serviceye ulaşılamazsa getOrderFallback methodunu çağırır
+    OrderDTO getOrderById(@PathVariable("orderId") Long orderId);//burda hata olursa aşağıdaki döner.
 
-    default OrderDTO getOrderFallback(Long orderId, Exception e) {
+    default OrderDTO getOrderFallback(Long orderId, Exception e) {//eğer service çalışmazsa burdan otomatik olraak dönen yapı sağlar.
         return new OrderDTO(
                 orderId,                     // id
                 "Fallback User Info",        // userInfo

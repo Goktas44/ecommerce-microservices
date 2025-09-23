@@ -19,9 +19,11 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> createOrder(
             @RequestParam Long userId,
             @RequestParam Long productId,
-            @RequestParam Integer quantity) {
+            @RequestParam Integer quantity,
+            @RequestParam String address,
+            @RequestParam String carrier) {
 
-        OrderResponseDTO order = orderService.createOrder(userId, productId, quantity);
+        OrderResponseDTO order = orderService.createOrder(userId, productId, quantity,address,carrier);
         return ResponseEntity.ok(order);
     }
 

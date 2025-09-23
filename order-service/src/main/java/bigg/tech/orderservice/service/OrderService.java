@@ -31,8 +31,9 @@ public class OrderService {
 
     @Autowired
     private ShippingServiceClient shippingServiceClient;
-    @CircuitBreaker(name = "orderService", fallbackMethod = "createOrderFallback")//servis ulaşılmadığı zaman otmatik userı atamasını id ile sağlar.
-    public OrderResponseDTO createOrder(Long userId, Long productId, Integer quantity) {
+   // @CircuitBreaker(name = "orderService", fallbackMethod = "createOrderFallback")//servis ulaşılmadığı zaman otmatik userı atamasını id ile sağlar.
+   //burada throw olduğu zmaan devreye giyer yoksa devam eder.
+    public OrderResponseDTO createOrder(Long userId, Long productId, Integer quantity,String address,String carrier) {
         // 1. Kullanıcıyı UserService'den al
         UserDTO user = userServiceClient.getUserById(userId);
         if (user == null) {
@@ -60,7 +61,8 @@ public class OrderService {
         order.setStatus("PENDING");
 
         Order savedOrder = orderRepository.save(order);
-
+        String tr= this.createShippingForOrder(savedOrder.getId(),address,carrier );
+        System.out.println(tr);
         // 5. Response DTO oluştur
         return convertToResponseDTO(savedOrder, user, product);
     }
@@ -74,7 +76,7 @@ public class OrderService {
 
         return convertToResponseDTO(order, user, product);
     }
-    // Fallback method
+    // Fallback method(herhangi bir serviceye ulaşamazsa)
     public OrderResponseDTO createOrderFallback(Long userId, Long productId, Integer quantity, Exception e) {
         UserDTO fallbackUser = new UserDTO(userId, "Fallback User", "fallback@email.com");
         ProductDTO fallbackProduct = new ProductDTO(productId, "Fallback Product", BigDecimal.ZERO, 0);
@@ -113,7 +115,7 @@ public class OrderService {
         return dto;
     }
 
-    public String createShippingForOrder(Long orderId, String address, String carrier) {
+    public String createShippingForOrder(Long orderId, String address, String carrier) {//buran direk kargo takip sistemine istek atılıyor.Bundan önceki bütün işlemler başarı ile gerçekleştirilmiştir
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 

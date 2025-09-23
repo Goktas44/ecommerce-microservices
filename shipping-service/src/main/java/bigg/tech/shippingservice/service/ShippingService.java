@@ -1,8 +1,8 @@
 package bigg.tech.shippingservice.service;
 
-import bigg.tech.shippingservice.fiegn.OrderServiceClient;
 import bigg.tech.shippingservice.dto.OrderDTO;
 import bigg.tech.shippingservice.dto.ShippingResponseDTO;
+import bigg.tech.shippingservice.fiegn.OrderServiceClient;
 import bigg.tech.shippingservice.model.Shipping;
 import bigg.tech.shippingservice.repository.ShippingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +20,9 @@ public class ShippingService {
     @Autowired
     private OrderServiceClient orderServiceClient;
 
+    //    @CircuitBreaker(name = "shippingService", fallbackMethod = "createShippingFallback")
     public ShippingResponseDTO createShipping(Long orderId, String address, String carrier) {
-        // Order'ı kontrol et (Feign Client ile)
+        // Order'ı kontrol et (Feign Client ile) http isteği atarakm çeker normal rest sistem gibi
         OrderDTO order = orderServiceClient.getOrderById(orderId);
         if (order == null) {
             throw new RuntimeException("Order not found");
@@ -33,6 +34,16 @@ public class ShippingService {
 
         return convertToResponseDTO(savedShipping, order);
     }
+
+    //for service unavailable
+//    public ShippingResponseDTO createShippingFallback(Long orderId, String address, String carrier, Exception e) {
+//        ShippingResponseDTO fallback = new ShippingResponseDTO();
+//        fallback.setOrderId(orderId);
+//        fallback.setAddress(address);
+//        fallback.setCarrier(carrier);
+//        fallback.setStatus("FALLBACK - SERVICE UNAVAILABLE");
+//        return fallback;
+//    }
 
     public ShippingResponseDTO updateShippingStatus(Long shippingId, String status) {
         Shipping shipping = shippingRepository.findById(shippingId)
