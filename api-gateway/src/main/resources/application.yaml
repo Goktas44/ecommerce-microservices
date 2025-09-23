@@ -6,26 +6,28 @@ spring:
     name: api-gateway
   cloud:
     gateway:
-      routes:
-        - id: user-service
-          uri: lb://USER-SERVICE  # ? Load balancing ile user-service'e y�nlendir
-          predicates:
-            - Path=/api/users/**
+      server:
+        webflux:
+          routes:
+            - id: user-service
+              uri: lb://USER-SERVICE  # ? Load balancing ile user-service'e y�nlendir
+              predicates:
+                  - Path=/api/users/**
 
-        - id: product-service
-          uri: lb://PRODUCT-SERVICE
-          predicates:
-            - Path=/api/products/**
+            - id: product-service
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                  - Path=/api/products/**
 
-        - id: order-service
-          uri: lb://ORDER-SERVICE
-          predicates:
-            - Path=/api/orders/**
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                  - Path=/api/orders/**
 
-        - id: shipping-service
-          uri: lb://SHIPPING-SERVICE
-          predicates:
-            - Path=/api/shippings/**
+            - id: shipping-service
+              uri: lb://SHIPPING-SERVICE
+              predicates:
+                  - Path=/api/shippings/**
 
 eureka:
   client:
