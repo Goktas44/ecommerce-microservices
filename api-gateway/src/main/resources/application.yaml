@@ -9,10 +9,10 @@ spring:
       server:
         webflux:
           routes:
-            - id: user-service
+            - id: user-service # her servisin gateway taranıdan eşsiz tanımasını sağlar
               uri: lb://USER-SERVICE  # ? Load balancing ile user-service'e y�nlendir
               predicates:
-                  - Path=/api/users/**
+                  - Path=/api/users/** #gelen istekleri yönlendireceği yol.Ama round robin ile yapar birden fazla farklı portlarda çalışan yapı olabilir.
 
             - id: product-service
               uri: lb://PRODUCT-SERVICE
